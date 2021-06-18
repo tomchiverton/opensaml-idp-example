@@ -44,13 +44,15 @@ public final class IdentityProviderClient {
         params.add(new BasicNameValuePair("RelayState", ""));
         httpPost.setEntity(new UrlEncodedFormEntity(params));
 
-        System.out.format("%n***** Sending request to Okta ******%n%n");
+        System.out.format("%n***** NOT Sending request ******%n%n");
+
+        /*
         try (CloseableHttpClient httpClient = HttpClients.createSystem();
              CloseableHttpResponse httpResponse = httpClient.execute(httpPost)) {
             System.out.println(httpPost);
             System.out.println(httpResponse.getStatusLine());
             Arrays.stream(httpResponse.getAllHeaders()).forEach(System.out::println);
             System.out.println(EntityUtils.toString(httpResponse.getEntity()));
-        }
+        }*/
     }
 }
