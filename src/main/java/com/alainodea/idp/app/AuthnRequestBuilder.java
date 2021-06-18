@@ -17,7 +17,32 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Properties;
 
-final class AuthnRequestBuilder {
+public class AuthnRequestBuilder {
+    // ColdFusion / external call entry point
+    public static AuthnRequest buildAuthRequest(String idp_props_path, String userName, List<NamedAttribute> attributes) throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException, UnrecoverableEntryException {
+
+        Properties properties = new Properties();
+        try (Reader reader = new FileReader(idp_props_path+"idp.properties")) {
+            properties.load(reader);
+        }
+
+        AuthnRequest input = new AuthnRequest();
+        input.authenticationInstant = Instant.now();
+        input.issuer = properties.getProperty("issuer");
+        input.audienceRestriction = properties.getProperty("audienceRestriction");
+        input.destinationUrl = properties.getProperty("destinationUrl");
+        input.nameId = userName;
+        input.sessionId = new RandomIdentifierGenerationStrategy().generateIdentifier();
+        input.attributes = attributes;
+        input.signingCredential = loadSigningCredential(
+                properties.getProperty("signingKeystorePassword"),
+                idp_props_path+properties.getProperty("signingKeystore")
+        );
+
+        return input;
+    }
+
+    // upstream entry point from IdentityProviderMain
     static AuthnRequest buildAuthRequest(String userName, List<NamedAttribute> attributes) throws IOException, CertificateException, NoSuchAlgorithmException, KeyStoreException, UnrecoverableEntryException {
         Properties properties = new Properties();
         try (Reader reader = new FileReader("idp.properties")) {
