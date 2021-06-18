@@ -61,6 +61,8 @@ elements you could remix into one.
     * Set **destinationUrl** to be the Assertion Consumer Service URL
     from the Identity Provider you created in Okta in step 3
 
+To get the .crt as a .pem you can exchange ```openssl pkcs12  -in idp-signing.p12 -out idp-signing.crt.pem``` then cat the .pem file to find the public key
+
 Note: you can adapt the guide above. It's intended as a quick start.
 
 ## Regenerating IdP Signature Certificate
