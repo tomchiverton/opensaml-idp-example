@@ -15,8 +15,8 @@ import org.opensaml.saml.saml2.core.impl.StatusCodeBuilder;
 
 import java.util.concurrent.TimeUnit;
 
-final class ResponseFactory {
-    static Response buildResponse(AuthnRequest input) throws Exception {
+public final class ResponseFactory {
+    public static Response buildResponse(AuthnRequest input) throws Exception {
         long instant = TimeUnit.SECONDS.toMillis(input.authenticationInstant.getEpochSecond());
         DateTime authenticationTime = new DateTime(instant);
 
