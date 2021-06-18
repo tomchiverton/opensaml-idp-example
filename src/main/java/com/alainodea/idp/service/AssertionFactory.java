@@ -11,6 +11,10 @@ import org.opensaml.saml.saml2.core.*;
 import org.opensaml.saml.saml2.core.impl.*;
 import org.opensaml.xmlsec.signature.support.SignatureException;
 
+import org.opensaml.core.xml.config.*;
+import org.opensaml.core.config.*;
+import java.util.Map;
+
 final class AssertionFactory {
     static Assertion buildAssertion(AuthnRequest input, DateTime authenticationTime) throws MarshallingException, SignatureException {
         Assertion assertion = new AssertionBuilder().buildObject();
@@ -32,9 +36,14 @@ final class AssertionFactory {
         return issuer;
     }
 
-    private static AttributeStatement buildAttributeStatement(AuthnRequest input) {
+    private static AttributeStatement buildAttributeStatement(AuthnRequest input) throws MarshallingException{
         AttributeStatementBuilder attributeStatementBuilder =
                 (AttributeStatementBuilder) XMLObjectSupport.getBuilder(AttributeStatement.DEFAULT_ELEMENT_NAME);
+
+        if( attributeStatementBuilder == null ){
+            throw new MarshallingException("attributeStatementBuilder not found for "+AttributeStatement.DEFAULT_ELEMENT_NAME);
+        }
+
         AttributeStatement attrStatement = attributeStatementBuilder.buildObject();
         input.attributes.stream().map(AttributeConverter::convertAttribute).forEach(attrStatement.getAttributes()::add);
         return attrStatement;
