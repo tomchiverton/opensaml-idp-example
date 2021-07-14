@@ -30,7 +30,7 @@ final class AssertionFactory {
         assertion.setIssuer(buildIssuer(input));
         assertion.setIssueInstant(authenticationTime);
         assertion.setVersion(SAMLVersion.VERSION_20);
-        assertion.getAuthnStatements().add(buildAuthnStatement(input, authenticationTime));
+        assertion.getAuthnStatements().add(buildAuthnStatement(input, authenticationTime, withNotBefore));
         assertion.getAttributeStatements().add(buildAttributeStatement(input));
         assertion.setConditions(buildConditions(input,withNotBefore));
         assertion.setSubject(buildSubject(input, authenticationTime, withNotBefore));
@@ -57,12 +57,15 @@ final class AssertionFactory {
         return attrStatement;
     }
 
-    private static AuthnStatement buildAuthnStatement(AuthnRequest input, DateTime authenticationTime) {
+    private static AuthnStatement buildAuthnStatement(AuthnRequest input, DateTime authenticationTime, boolean withSessionNotOnOrAfter) {
         AuthnStatement authnStatement = new AuthnStatementBuilder().buildObject();
 
         authnStatement.setAuthnInstant(authenticationTime);
         authnStatement.setSessionIndex(input.sessionId);
-        authnStatement.setSessionNotOnOrAfter(authenticationTime.plus(input.maxSessionTimeoutInMinutes));
+
+        if( withSessionNotOnOrAfter ){
+            authnStatement.setSessionNotOnOrAfter(authenticationTime.plus(input.maxSessionTimeoutInMinutes));
+        }
 
         AuthnContext authnContext = new AuthnContextBuilder().buildObject();
 
