@@ -17,6 +17,14 @@ import java.util.Map;
 
 final class AssertionFactory {
     static Assertion buildAssertion(AuthnRequest input, DateTime authenticationTime) throws MarshallingException, SignatureException {
+        return buildAssertionImpl( input,authenticationTime,true );
+    }
+
+    static Assertion buildAssertion(AuthnRequest input, DateTime authenticationTime, boolean withNotBefore) throws MarshallingException, SignatureException {
+        return buildAssertionImpl( input,authenticationTime,withNotBefore );
+    }
+
+    private static Assertion buildAssertionImpl(AuthnRequest input, DateTime authenticationTime, boolean withNotBefore) throws MarshallingException, SignatureException {
         Assertion assertion = new AssertionBuilder().buildObject();
         assertion.setID(new RandomIdentifierGenerationStrategy().generateIdentifier());
         assertion.setIssuer(buildIssuer(input));
@@ -24,8 +32,8 @@ final class AssertionFactory {
         assertion.setVersion(SAMLVersion.VERSION_20);
         assertion.getAuthnStatements().add(buildAuthnStatement(input, authenticationTime));
         assertion.getAttributeStatements().add(buildAttributeStatement(input));
-        assertion.setConditions(buildConditions(input));
-        assertion.setSubject(buildSubject(input, authenticationTime));
+        assertion.setConditions(buildConditions(input,withNotBefore));
+        assertion.setSubject(buildSubject(input, authenticationTime, withNotBefore));
         AssertionSigner signingFactory = AssertionSigner.createWithCredential(input.signingCredential);
         return signingFactory.signAssertion(assertion);
     }
@@ -66,10 +74,13 @@ final class AssertionFactory {
         return authnStatement;
     }
 
-    private static Conditions buildConditions(AuthnRequest input) {
+    private static Conditions buildConditions(AuthnRequest input, boolean withOneTimeUse) {
         Conditions conditions = new ConditionsBuilder().buildObject();
-        Condition condition = new OneTimeUseBuilder().buildObject();
-        conditions.getConditions().add(condition);
+        
+        if( withOneTimeUse ){
+            Condition condition = new OneTimeUseBuilder().buildObject();
+            conditions.getConditions().add(condition);
+        }
 
         AudienceRestriction audienceRestriction = new AudienceRestrictionBuilder().buildObject();
 
@@ -82,9 +93,13 @@ final class AssertionFactory {
         return conditions;
     }
 
-    private static Subject buildSubject(AuthnRequest input, DateTime authenticationTime) {
+    private static Subject buildSubject(AuthnRequest input, DateTime authenticationTime, boolean withNotBefore) {
         SubjectConfirmationData confirmationData = new SubjectConfirmationDataBuilder().buildObject();
-        confirmationData.setNotBefore(authenticationTime);
+        
+        if( withNotBefore ){
+            confirmationData.setNotBefore(authenticationTime);
+        }
+            
         confirmationData.setNotOnOrAfter(authenticationTime.plusMinutes(2));
         confirmationData.setRecipient(input.destinationUrl);
 

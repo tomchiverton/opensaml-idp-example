@@ -17,6 +17,13 @@ import java.util.concurrent.TimeUnit;
 
 public final class ResponseFactory {
     public static Response buildResponse(AuthnRequest input) throws Exception {
+        return buildResponseImpl(input,true );
+    }
+    public static Response buildResponseWithoutNotBefore(AuthnRequest input) throws Exception {
+        return buildResponseImpl(input,false);
+    }
+
+    private static Response buildResponseImpl(AuthnRequest input,boolean withNotBefore) throws Exception {
         long instant = TimeUnit.SECONDS.toMillis(input.authenticationInstant.getEpochSecond());
         DateTime authenticationTime = new DateTime(instant);
 
@@ -27,7 +34,7 @@ public final class ResponseFactory {
         response.setIssuer(buildIssuer(input));
         response.setDestination(input.destinationUrl);
         response.setStatus(buildStatus());
-        response.getAssertions().add(AssertionFactory.buildAssertion(input, authenticationTime));
+        response.getAssertions().add(AssertionFactory.buildAssertion(input, authenticationTime, withNotBefore));
 
         return response;
     }
